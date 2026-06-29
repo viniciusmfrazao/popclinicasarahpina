@@ -28,7 +28,7 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Logo area */}
         <div className="flex flex-col items-center mb-10">
-          <div className="relative w-44 h-32">
+          <div className="relative w-64 h-44">
             <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain' }} priority />
           </div>
           <div className="mt-4 h-px w-24 gold-bar" />
