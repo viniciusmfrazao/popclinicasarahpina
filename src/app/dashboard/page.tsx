@@ -19,96 +19,108 @@ export default function Dashboard() {
       supabase.from('profiles').select('name,role').eq('id', data.user.id).single()
         .then(({ data: p }) => p && setProfile(p))
       supabase.from('sections').select('status')
-        .then(({ data: s }) => {
-          if (s) setStats({ sections: s.length, levantado: s.filter(x => x.status === 'levantado').length })
-        })
+        .then(({ data: s }) => s && setStats({
+          sections: s.length,
+          levantado: s.filter(x => x.status === 'levantado').length
+        }))
     })
   }, [router])
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite'
   const pct = stats.sections > 0 ? Math.round((stats.levantado / stats.sections) * 100) : 0
+  const firstName = profile?.name?.split(' ')[0] ?? '...'
 
   const cards = [
-    { icon: BookOpen, label: 'Seções do POP', value: stats.sections, sub: `${stats.levantado} levantadas`, href: '/pop', color: '#C4A35A', bg: '#F5EDD8' },
-    { icon: GraduationCap, label: 'Cursos', value: 3, sub: 'disponíveis', href: '/cursos', color: '#7A8C6E', bg: '#EEF2EB' },
-    { icon: CheckSquare, label: 'Checklists', value: '—', sub: 'por seção', href: '/checklist', color: '#8A7A6E', bg: '#F0ECE8' },
-    { icon: TrendingUp, label: 'Progresso', value: `${pct}%`, sub: 'do POP levantado', href: '/pop', color: '#9E7E3A', bg: '#F5EDD8' },
+    { icon: BookOpen,      label: 'Seções do POP', value: stats.sections, sub: `${stats.levantado} concluídas`, href: '/pop'       },
+    { icon: GraduationCap, label: 'Cursos',         value: 3,              sub: 'disponíveis',                  href: '/cursos'    },
+    { icon: CheckSquare,   label: 'Checklists',     value: '—',            sub: 'por seção',                    href: '/checklist' },
+    { icon: TrendingUp,    label: 'Progresso',      value: `${pct}%`,      sub: 'do POP levantado',             href: '/pop'       },
   ]
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#F7F5F0' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#F9F5F6' }}>
+
       {/* Header */}
-      <div className="px-5 pt-10 pb-8 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1C1A17 0%, #2D2A24 100%)' }}>
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #C4A35A 0%, transparent 50%)' }} />
-        <div className="relative flex items-center justify-between mb-4">
-          <div className="relative w-24 h-14">
+      <div className="header-bg px-5 pt-12 pb-8 relative overflow-hidden">
+        {/* Subtle gold glow */}
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #C4A35A, transparent)', transform: 'translate(30%,-30%)' }} />
+
+        <div className="relative flex items-center justify-between mb-6">
+          <div className="relative w-28 h-16">
             <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain', objectPosition: 'left' }} />
           </div>
-          <div className="text-xs tracking-[0.15em] uppercase px-3 py-1 rounded-full"
-            style={{ color: '#C4A35A', border: '1px solid #C4A35A33', background: '#C4A35A11' }}>
+          <span className="text-[10px] tracking-[0.2em] uppercase px-3 py-1 rounded-full font-medium"
+            style={{ color: '#E8CFA0', border: '1px solid rgba(196,163,90,0.4)', background: 'rgba(196,163,90,0.1)' }}>
             {profile?.role === 'admin' ? 'Admin' : profile?.role === 'student' ? 'Aluna' : 'Equipe'}
-          </div>
+          </span>
         </div>
-        <p className="text-sm mb-0.5" style={{ color: '#B0A898' }}>{greeting},</p>
-        <h1 className="text-xl font-semibold" style={{ color: '#F5EDD8' }}>
-          {profile?.name?.split(' ')[0] ?? '...'} ✨
-        </h1>
+
+        <p className="text-sm font-light mb-1" style={{ color: 'rgba(255,255,255,0.6)' }}>{greeting},</p>
+        <h1 className="text-2xl font-semibold" style={{ color: '#fff' }}>{firstName}</h1>
+
         {/* Gold divider */}
-        <div className="mt-4 h-px" style={{ background: 'linear-gradient(90deg, #C4A35A, transparent)' }} />
+        <div className="mt-5 h-px gold-bar opacity-70" />
       </div>
 
-      <div className="px-4 py-5">
+      <div className="px-4 -mt-3">
         {/* Cards */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          {cards.map(({ icon: Icon, label, value, sub, href, color, bg }) => (
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {cards.map(({ icon: Icon, label, value, sub, href }, i) => (
             <Link key={label} href={href}
-              className="rounded-2xl p-4 active:scale-95 transition-transform"
-              style={{ background: '#fff', border: '1px solid #E8DCC8', boxShadow: '0 1px 4px rgba(196,163,90,0.08)' }}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: bg }}>
-                <Icon size={18} color={color} strokeWidth={1.5} />
+              className="rounded-2xl p-4 bg-white active:scale-95 transition-transform"
+              style={{ border: '1px solid #EDD8DE', boxShadow: '0 2px 8px rgba(107,30,46,0.06)' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3"
+                style={{ background: i % 2 === 0 ? '#F5E8EC' : '#F5EDD8' }}>
+                <Icon size={17} color={i % 2 === 0 ? '#6B1E2E' : '#9E7E3A'} strokeWidth={1.5} />
               </div>
-              <div className="text-xl font-bold" style={{ color: '#1C1A17' }}>{value}</div>
-              <div className="text-xs font-medium mt-0.5" style={{ color: '#1C1A17' }}>{label}</div>
-              <div className="text-xs mt-0.5" style={{ color: '#B0A898' }}>{sub}</div>
+              <div className="text-2xl font-bold" style={{ color: '#1C1A17' }}>{value}</div>
+              <div className="text-xs font-semibold mt-0.5 leading-tight" style={{ color: '#4A1020' }}>{label}</div>
+              <div className="text-[11px] mt-0.5" style={{ color: '#B0A898' }}>{sub}</div>
             </Link>
           ))}
         </div>
 
-        {/* Progress */}
-        <div className="rounded-2xl p-4 mb-4"
-          style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
-          <div className="flex justify-between mb-2">
-            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: '#9E7E3A' }}>Progresso do POP</span>
-            <span className="text-sm font-semibold" style={{ color: '#C4A35A' }}>{pct}%</span>
+        {/* Progress bar */}
+        <div className="rounded-2xl bg-white p-4 mb-4"
+          style={{ border: '1px solid #EDD8DE', boxShadow: '0 2px 8px rgba(107,30,46,0.04)' }}>
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: '#6B1E2E' }}>
+              Progresso Geral
+            </span>
+            <span className="text-sm font-bold" style={{ color: '#C4A35A' }}>{pct}%</span>
           </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#F5EDD8' }}>
-            <div className="h-full rounded-full transition-all gold-gradient" style={{ width: `${pct}%` }} />
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: '#F5E8EC' }}>
+            <div className="h-full rounded-full transition-all"
+              style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #6B1E2E, #C4A35A)' }} />
           </div>
         </div>
 
         {/* Quick access */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
-          <div className="px-4 py-3 border-b" style={{ borderColor: '#F0EBE0' }}>
-            <span className="text-xs font-medium tracking-[0.1em] uppercase" style={{ color: '#9E7E3A' }}>Acesso Rápido</span>
+        <div className="rounded-2xl bg-white overflow-hidden"
+          style={{ border: '1px solid #EDD8DE', boxShadow: '0 2px 8px rgba(107,30,46,0.04)' }}>
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid #F5E8EC' }}>
+            <span className="text-[11px] font-semibold tracking-[0.15em] uppercase" style={{ color: '#6B1E2E' }}>
+              Acesso Rápido
+            </span>
           </div>
           {[
-            { label: 'Manual POP completo', href: '/pop' },
-            { label: 'Cursos da clínica', href: '/cursos' },
-            { label: 'Meus checklists', href: '/checklist' },
-            { label: 'Meu perfil', href: '/perfil' },
+            { label: 'Manual POP completo',  href: '/pop'       },
+            { label: 'Cursos da clínica',    href: '/cursos'    },
+            { label: 'Meus checklists',      href: '/checklist' },
+            { label: 'Meu perfil',           href: '/perfil'    },
           ].map(({ label, href }) => (
             <Link key={href} href={href}
-              className="flex items-center justify-between px-4 py-3.5 border-b last:border-0 active:opacity-70"
-              style={{ borderColor: '#F0EBE0' }}>
+              className="flex items-center justify-between px-4 py-3.5 active:opacity-70"
+              style={{ borderBottom: '1px solid #F9F5F6' }}>
               <span className="text-sm" style={{ color: '#1C1A17' }}>{label}</span>
-              <span className="text-xs" style={{ color: '#C4A35A' }}>→</span>
+              <span className="text-xs font-semibold" style={{ color: '#C4A35A' }}>→</span>
             </Link>
           ))}
         </div>
       </div>
+
       <BottomNav />
     </div>
   )

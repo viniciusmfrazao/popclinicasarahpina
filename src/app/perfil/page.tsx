@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import { LogOut, BookOpen, GraduationCap } from 'lucide-react'
+import { LogOut, BookOpen, GraduationCap, CheckSquare } from 'lucide-react'
 import Image from 'next/image'
 
 export default function PerfilPage() {
@@ -21,58 +21,55 @@ export default function PerfilPage() {
     })
   }, [router])
 
-  async function logout() {
-    await supabase.auth.signOut()
-    router.push('/login')
-  }
-
   const roleLabel = { admin: 'Administradora', team: 'Equipe', student: 'Aluna' }[profile?.role ?? 'team']
-  const initial = profile?.name?.charAt(0).toUpperCase() ?? '?'
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#F7F5F0' }}>
-      {/* Header */}
-      <div className="px-5 pt-10 pb-6" style={{ background: 'linear-gradient(135deg, #1C1A17 0%, #2D2A24 100%)' }}>
-        <div className="relative w-20 h-12 mb-4">
+    <div className="min-h-screen pb-28" style={{ background: '#F9F5F6' }}>
+      <div className="header-bg px-5 pt-12 pb-8">
+        <div className="relative w-24 h-14 mb-4">
           <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain', objectPosition: 'left' }} />
         </div>
-        <h1 className="text-xl font-semibold" style={{ color: '#F5EDD8' }}>Meu Perfil</h1>
+        <h1 className="text-xl font-semibold" style={{ color: '#fff' }}>Meu Perfil</h1>
       </div>
 
-      <div className="px-4 py-5 space-y-4">
+      <div className="px-4 py-5 space-y-3">
         {/* Profile card */}
-        <div className="rounded-2xl p-6 flex flex-col items-center"
-          style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-semibold mb-3 gold-gradient">
-            {initial}
+        <div className="rounded-2xl bg-white p-6 flex flex-col items-center"
+          style={{ border: '1px solid #EDD8DE', boxShadow: '0 2px 12px rgba(107,30,46,0.07)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-3 btn-bordo">
+            {profile?.name?.charAt(0).toUpperCase() ?? '?'}
           </div>
           <h2 className="text-base font-semibold" style={{ color: '#1C1A17' }}>{profile?.name ?? '...'}</h2>
           <p className="text-sm mt-0.5" style={{ color: '#B0A898' }}>{email}</p>
-          <span className="mt-2.5 text-xs font-medium px-3 py-1 rounded-full tracking-wide"
-            style={{ background: '#F5EDD8', color: '#9E7E3A', border: '1px solid #E8DCC8' }}>
+          <div className="mt-3 h-px w-12 gold-bar" />
+          <span className="mt-3 text-[11px] font-semibold tracking-[0.15em] uppercase px-4 py-1.5 rounded-full"
+            style={{ background: '#F5E8EC', color: '#6B1E2E', border: '1px solid #EDD8DE' }}>
             {roleLabel}
           </span>
         </div>
 
         {/* Menu */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
+        <div className="rounded-2xl bg-white overflow-hidden" style={{ border: '1px solid #EDD8DE' }}>
           {[
-            { icon: BookOpen, label: 'Manual POP', href: '/pop' },
-            { icon: GraduationCap, label: 'Cursos', href: '/cursos' },
+            { icon: BookOpen,      label: 'Manual POP',     href: '/pop'       },
+            { icon: GraduationCap, label: 'Cursos',          href: '/cursos'    },
+            { icon: CheckSquare,   label: 'Checklists',      href: '/checklist' },
           ].map(({ icon: Icon, label, href }) => (
             <a key={label} href={href}
-              className="flex items-center gap-3 px-4 py-4 border-b last:border-0 active:opacity-70"
-              style={{ borderColor: '#F5EDD8' }}>
-              <Icon size={17} color="#C4A35A" strokeWidth={1.5} />
+              className="flex items-center gap-3.5 px-4 py-4 active:opacity-70"
+              style={{ borderBottom: '1px solid #F9F5F6' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#F5E8EC' }}>
+                <Icon size={15} color="#6B1E2E" strokeWidth={1.5} />
+              </div>
               <span className="text-sm flex-1" style={{ color: '#1C1A17' }}>{label}</span>
-              <span style={{ color: '#C4A35A', fontSize: 12 }}>→</span>
+              <span className="text-xs font-semibold" style={{ color: '#C4A35A' }}>→</span>
             </a>
           ))}
         </div>
 
-        <button onClick={logout}
-          className="w-full rounded-2xl p-4 flex items-center justify-center gap-2"
-          style={{ background: '#fff', border: '1px solid #E8DCC8', color: '#8A7A6E' }}>
+        <button onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
+          className="w-full rounded-2xl p-4 flex items-center justify-center gap-2 bg-white"
+          style={{ border: '1px solid #EDD8DE', color: '#8B2A3D' }}>
           <LogOut size={16} />
           <span className="text-sm font-medium">Sair da conta</span>
         </button>

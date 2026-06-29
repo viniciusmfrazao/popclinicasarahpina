@@ -9,15 +9,14 @@ import { Section } from '@/lib/types'
 import { ChevronRight } from 'lucide-react'
 
 const STATUS = {
-  levantado: { label: 'Concluído', bg: '#EEF2EB', color: '#5A7A4E' },
+  levantado: { label: 'Concluído', bg: '#EEF2EB', color: '#4A7A3E' },
   parcial:   { label: 'Parcial',   bg: '#F5EDD8', color: '#9E7E3A' },
-  pendente:  { label: 'Pendente',  bg: '#F0ECE8', color: '#8A7A6E' },
+  pendente:  { label: 'Pendente',  bg: '#F5E8EC', color: '#8B2A3D' },
 }
-
-const ICONS: Record<string, string> = {
-  cultura: '🌸', jornada: '🗺️', reuniao: '📋', scripts: '💬',
-  marketing: '📱', profissionais: '👥', automacoes: '⚡',
-  juridico: '📄', financeiro: '💰', cursos: '🎓', nao_fazer: '🚫',
+const ICONS: Record<string,string> = {
+  cultura:'🌸', jornada:'🗺️', reuniao:'📋', scripts:'💬',
+  marketing:'📱', profissionais:'👥', automacoes:'⚡',
+  juridico:'📄', financeiro:'💰', cursos:'🎓', nao_fazer:'🚫',
 }
 
 export default function POPPage() {
@@ -37,24 +36,24 @@ export default function POPPage() {
   const pct = sections.length > 0 ? Math.round((levantado / sections.length) * 100) : 0
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#F7F5F0' }}>
-      {/* Header */}
-      <div className="px-5 pt-10 pb-5" style={{ background: 'linear-gradient(135deg, #1C1A17 0%, #2D2A24 100%)' }}>
-        <p className="text-xs tracking-[0.2em] uppercase mb-1" style={{ color: '#C4A35A' }}>Clínica Sarah Pina</p>
-        <h1 className="text-xl font-semibold mb-4" style={{ color: '#F5EDD8' }}>Manual POP</h1>
-        <div className="flex justify-between mb-2">
-          <span className="text-xs" style={{ color: '#B0A898' }}>Progresso geral</span>
-          <span className="text-xs font-semibold" style={{ color: '#C4A35A' }}>{pct}%</span>
+    <div className="min-h-screen pb-28" style={{ background: '#F9F5F6' }}>
+      <div className="header-bg px-5 pt-12 pb-6">
+        <p className="text-[11px] tracking-[0.25em] uppercase font-medium mb-1" style={{ color: '#E8CFA0' }}>Clínica Sarah Pina</p>
+        <h1 className="text-xl font-semibold mb-5" style={{ color: '#fff' }}>Manual de Operações</h1>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Progresso geral</span>
+          <span className="text-xs font-bold" style={{ color: '#C4A35A' }}>{pct}%</span>
         </div>
-        <div className="h-1 rounded-full overflow-hidden" style={{ background: '#2D2A24' }}>
-          <div className="h-full rounded-full gold-gradient transition-all" style={{ width: `${pct}%` }} />
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+          <div className="h-full rounded-full transition-all"
+            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #C4A35A, #E8CFA0)' }} />
         </div>
         <div className="flex gap-4 mt-3">
           {(['levantado','parcial','pendente'] as const).map(s => (
             <div key={s} className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS[s].color }} />
-              <span className="text-xs" style={{ color: '#6B6458' }}>
-                {STATUS[s].label}: {sections.filter(x => x.status === s).length}
+              <span className="text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {STATUS[s].label} · {sections.filter(x => x.status === s).length}
               </span>
             </div>
           ))}
@@ -65,7 +64,7 @@ export default function POPPage() {
         {loading ? (
           <div className="space-y-2.5">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: '#E8DCC8' }} />
+              <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: '#EDD8DE' }} />
             ))}
           </div>
         ) : (
@@ -74,15 +73,15 @@ export default function POPPage() {
               const st = STATUS[s.status]
               return (
                 <Link key={s.id} href={`/pop/${s.id}`}
-                  className="flex items-center gap-3.5 p-4 rounded-2xl active:scale-98 transition-transform"
-                  style={{ background: '#fff', border: '1px solid #E8DCC8', boxShadow: '0 1px 3px rgba(196,163,90,0.06)' }}>
+                  className="flex items-center gap-3.5 p-4 rounded-2xl bg-white active:scale-98 transition-transform"
+                  style={{ border: '1px solid #EDD8DE', boxShadow: '0 1px 4px rgba(107,30,46,0.05)' }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                    style={{ background: '#F5EDD8' }}>
+                    style={{ background: '#F5E8EC' }}>
                     {ICONS[s.id] ?? '📌'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate" style={{ color: '#1C1A17' }}>{s.title}</div>
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full inline-block mt-0.5"
+                    <div className="text-sm font-semibold truncate mb-1" style={{ color: '#1C1A17' }}>{s.title}</div>
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: st.bg, color: st.color }}>{st.label}</span>
                   </div>
                   <ChevronRight size={15} color="#C4A35A" />
