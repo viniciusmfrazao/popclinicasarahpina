@@ -47,18 +47,19 @@ export default function Dashboard() {
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10"
           style={{ background: 'radial-gradient(circle, #C4A35A, transparent)', transform: 'translate(30%,-30%)' }} />
 
-        <div className="relative flex items-center justify-between mb-6">
+        {/* Logo centralizada */}
+        <div className="flex justify-center mb-6">
           <div className="relative w-36 h-20">
-            <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain', objectPosition: 'left' }} />
+            <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain' }} />
           </div>
-          <span className="text-[10px] tracking-[0.2em] uppercase px-3 py-1 rounded-full font-medium"
-            style={{ color: '#E8CFA0', border: '1px solid rgba(196,163,90,0.4)', background: 'rgba(196,163,90,0.1)' }}>
-            {profile?.role === 'admin' ? 'Admin' : profile?.role === 'student' ? 'Aluna' : 'Equipe'}
-          </span>
         </div>
 
         <p className="text-sm font-light mb-1" style={{ color: 'rgba(255,255,255,0.6)' }}>{greeting},</p>
         <h1 className="text-2xl font-semibold" style={{ color: '#fff' }}>{firstName}</h1>
+        <span className="inline-block mt-1.5 text-[10px] tracking-[0.18em] uppercase font-medium px-2.5 py-0.5 rounded-full"
+          style={{ color: '#E8CFA0', border: '1px solid rgba(196,163,90,0.35)', background: 'rgba(196,163,90,0.1)' }}>
+          {profile?.role === 'admin' ? 'Admin' : profile?.role === 'student' ? 'Aluna' : 'Equipe'}
+        </span>
 
         {/* Gold divider */}
         <div className="mt-5 h-px gold-bar opacity-70" />
