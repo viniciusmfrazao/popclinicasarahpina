@@ -27,11 +27,11 @@ export default function LoginPage() {
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Logo area */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative w-72 h-52">
+        <div className="flex flex-col items-center mb-6">
+          <div style={{ position: 'relative', width: '88vw', maxWidth: '360px', height: '260px' }}>
             <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain' }} priority />
           </div>
-          <div className="h-px w-28 gold-bar" />
+          <div className="h-px w-32 gold-bar" />
           <p className="mt-3 text-[11px] tracking-[0.3em] uppercase font-medium" style={{ color: '#9E7E3A' }}>
             Sistema de Gestão
           </p>
