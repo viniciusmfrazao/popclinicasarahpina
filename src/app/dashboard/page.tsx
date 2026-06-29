@@ -111,6 +111,7 @@ export default function Dashboard() {
             { label: 'Cursos da clínica',    href: '/cursos'    },
             { label: 'Meus checklists',      href: '/checklist' },
             { label: 'Meu perfil',           href: '/perfil'    },
+            { label: '⚙️ Painel Admin',         href: '/admin'     },
           ].map(({ label, href }) => (
             <Link key={href} href={href}
               className="flex items-center justify-between px-4 py-3.5 active:opacity-70"
