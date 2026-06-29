@@ -9,9 +9,9 @@ import { ChevronDown, ChevronUp, Plus, Trash2, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 const STATUS = {
-  levantado: { label: 'Levantado', bg: '#E1F5EE', color: '#0F6E56' },
-  parcial: { label: 'Parcial', bg: '#FAEEDA', color: '#BA7517' },
-  pendente: { label: 'Pendente', bg: '#FBEAF0', color: '#993556' },
+  levantado: { label: 'Concluído', bg: '#EEF2EB', color: '#5A7A4E' },
+  parcial:   { label: 'Parcial',   bg: '#F5EDD8', color: '#9E7E3A' },
+  pendente:  { label: 'Pendente',  bg: '#F0ECE8', color: '#8A7A6E' },
 }
 
 export default function SectionPage() {
@@ -25,18 +25,17 @@ export default function SectionPage() {
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
       setUserId(data.user.id)
-      Promise.all([
+      const [{ data: sec }, { data: its }, { data: nts }] = await Promise.all([
         supabase.from('sections').select('*').eq('id', id).single(),
         supabase.from('section_items').select('*').eq('section_id', id).order('sort_order'),
         supabase.from('notes').select('*').eq('section_id', id).eq('user_id', data.user.id).order('created_at'),
-      ]).then(([{ data: sec }, { data: its }, { data: nts }]) => {
-        if (sec) setSection(sec)
-        if (its) setItems(its)
-        if (nts) setNotes(nts)
-      })
+      ])
+      if (sec) setSection(sec)
+      if (its) setItems(its)
+      if (nts) setNotes(nts)
     })
   }, [id, router])
 
@@ -51,40 +50,56 @@ export default function SectionPage() {
     setNotes(p => p.filter(n => n.id !== noteId))
   }
 
-  if (!section) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-pink-400 border-t-transparent rounded-full animate-spin" /></div>
+  if (!section) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F5F0' }}>
+      <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#C4A35A', borderTopColor: 'transparent' }} />
+    </div>
+  )
 
   const st = STATUS[section.status]
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#F7F6F3' }}>
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3">
-        <Link href="/pop"><ArrowLeft size={20} color="#D4537E" /></Link>
+    <div className="min-h-screen pb-24" style={{ background: '#F7F5F0' }}>
+      {/* Header */}
+      <div className="sticky top-0 z-40 px-4 py-3.5 flex items-center gap-3"
+        style={{ background: '#1C1A17', borderBottom: '1px solid #2D2A24' }}>
+        <Link href="/pop">
+          <ArrowLeft size={20} color="#C4A35A" />
+        </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-sm font-semibold text-gray-900 truncate">{section.title}</h1>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: st.bg, color: st.color }}>{st.label}</span>
+          <h1 className="text-sm font-semibold truncate" style={{ color: '#F5EDD8' }}>{section.title}</h1>
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{ background: st.bg, color: st.color }}>{st.label}</span>
         </div>
       </div>
 
       <div className="px-4 py-4 space-y-3">
         {/* Summary */}
-        <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <p className="text-sm text-gray-600">{section.summary}</p>
+        <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
+          <p className="text-sm leading-relaxed" style={{ color: '#6B6458' }}>{section.summary}</p>
         </div>
 
         {/* Items */}
         {items.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1">Conteúdo</h2>
-            {items.map(item => (
-              <div key={item.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <p className="text-xs font-medium tracking-[0.1em] uppercase px-1" style={{ color: '#9E7E3A' }}>Conteúdo</p>
+            {items.map((item, i) => (
+              <div key={item.id} className="rounded-2xl overflow-hidden"
+                style={{ background: '#fff', border: expanded === item.id ? '1px solid #C4A35A' : '1px solid #E8DCC8' }}>
                 <button onClick={() => setExpanded(expanded === item.id ? null : item.id)}
-                  className="w-full px-4 py-3.5 flex items-center justify-between text-left">
-                  <span className="text-sm font-medium text-gray-900">{item.title}</span>
-                  {expanded === item.id ? <ChevronUp size={16} color="#9CA3AF" /> : <ChevronDown size={16} color="#9CA3AF" />}
+                  className="w-full px-4 py-3.5 flex items-center justify-between text-left gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: '#F5EDD8', color: '#9E7E3A' }}>{i + 1}</span>
+                    <span className="text-sm font-medium" style={{ color: '#1C1A17' }}>{item.title}</span>
+                  </div>
+                  {expanded === item.id
+                    ? <ChevronUp size={15} color="#C4A35A" />
+                    : <ChevronDown size={15} color="#C4A35A" />}
                 </button>
                 {expanded === item.id && (
-                  <div className="px-4 pb-4 border-t border-gray-50">
-                    <p className="text-sm text-gray-600 leading-relaxed mt-3 whitespace-pre-line">{item.content}</p>
+                  <div className="px-4 pb-4" style={{ borderTop: '1px solid #F5EDD8' }}>
+                    <p className="text-sm leading-relaxed mt-3 whitespace-pre-line" style={{ color: '#6B6458' }}>{item.content}</p>
                   </div>
                 )}
               </div>
@@ -94,26 +109,28 @@ export default function SectionPage() {
 
         {/* Notes */}
         <div>
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1 mb-2">Minhas Anotações</h2>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <p className="text-xs font-medium tracking-[0.1em] uppercase px-1 mb-2" style={{ color: '#9E7E3A' }}>Minhas Anotações</p>
+          <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1px solid #E8DCC8' }}>
             {notes.map(note => (
-              <div key={note.id} className="flex gap-3 py-2.5 border-b border-gray-50 last:border-0">
-                <p className="flex-1 text-sm text-gray-700 leading-relaxed">{note.content}</p>
-                <button onClick={() => deleteNote(note.id)} className="shrink-0 p-1 text-gray-300 hover:text-red-400">
-                  <Trash2 size={14} />
+              <div key={note.id} className="flex gap-3 py-2.5" style={{ borderBottom: '1px solid #F5EDD8' }}>
+                <p className="flex-1 text-sm leading-relaxed" style={{ color: '#1C1A17' }}>{note.content}</p>
+                <button onClick={() => deleteNote(note.id)} className="shrink-0 p-1" style={{ color: '#C4A35A' }}>
+                  <Trash2 size={13} />
                 </button>
               </div>
             ))}
-            {notes.length === 0 && <p className="text-sm text-gray-400 mb-3">Nenhuma anotação ainda.</p>}
+            {notes.length === 0 && (
+              <p className="text-sm mb-3" style={{ color: '#B0A898', fontStyle: 'italic' }}>Nenhuma anotação ainda.</p>
+            )}
             <div className="flex gap-2 mt-3">
               <input value={noteText} onChange={e => setNoteText(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addNote()}
                 placeholder="Adicionar anotação..."
-                className="flex-1 text-sm px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none text-gray-900" />
+                className="flex-1 text-sm px-3 py-2.5 rounded-xl focus:outline-none"
+                style={{ background: '#F7F5F0', border: '1px solid #E8DCC8', color: '#1C1A17' }} />
               <button onClick={addNote}
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0"
-                style={{ background: '#D4537E' }}>
-                <Plus size={16} />
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 gold-gradient">
+                <Plus size={16} color="#fff" />
               </button>
             </div>
           </div>

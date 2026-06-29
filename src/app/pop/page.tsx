@@ -9,9 +9,15 @@ import { Section } from '@/lib/types'
 import { ChevronRight } from 'lucide-react'
 
 const STATUS = {
-  levantado: { label: 'Levantado', bg: '#E1F5EE', color: '#0F6E56' },
-  parcial: { label: 'Parcial', bg: '#FAEEDA', color: '#BA7517' },
-  pendente: { label: 'Pendente', bg: '#FBEAF0', color: '#993556' },
+  levantado: { label: 'Concluído', bg: '#EEF2EB', color: '#5A7A4E' },
+  parcial:   { label: 'Parcial',   bg: '#F5EDD8', color: '#9E7E3A' },
+  pendente:  { label: 'Pendente',  bg: '#F0ECE8', color: '#8A7A6E' },
+}
+
+const ICONS: Record<string, string> = {
+  cultura: '🌸', jornada: '🗺️', reuniao: '📋', scripts: '💬',
+  marketing: '📱', profissionais: '👥', automacoes: '⚡',
+  juridico: '📄', financeiro: '💰', cursos: '🎓', nao_fazer: '🚫',
 }
 
 export default function POPPage() {
@@ -22,10 +28,8 @@ export default function POPPage() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
-      supabase.from('sections').select('*').order('sort_order').then(({ data }) => {
-        if (data) setSections(data)
-        setLoading(false)
-      })
+      supabase.from('sections').select('*').order('sort_order')
+        .then(({ data }) => { if (data) setSections(data); setLoading(false) })
     })
   }, [router])
 
@@ -33,36 +37,36 @@ export default function POPPage() {
   const pct = sections.length > 0 ? Math.round((levantado / sections.length) * 100) : 0
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#F7F6F3' }}>
-      <div className="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 py-3">
-        <h1 className="text-base font-semibold text-gray-900">Manual POP</h1>
-        <p className="text-xs text-gray-500">Clínica Sarah Pina</p>
+    <div className="min-h-screen pb-24" style={{ background: '#F7F5F0' }}>
+      {/* Header */}
+      <div className="px-5 pt-10 pb-5" style={{ background: 'linear-gradient(135deg, #1C1A17 0%, #2D2A24 100%)' }}>
+        <p className="text-xs tracking-[0.2em] uppercase mb-1" style={{ color: '#C4A35A' }}>Clínica Sarah Pina</p>
+        <h1 className="text-xl font-semibold mb-4" style={{ color: '#F5EDD8' }}>Manual POP</h1>
+        <div className="flex justify-between mb-2">
+          <span className="text-xs" style={{ color: '#B0A898' }}>Progresso geral</span>
+          <span className="text-xs font-semibold" style={{ color: '#C4A35A' }}>{pct}%</span>
+        </div>
+        <div className="h-1 rounded-full overflow-hidden" style={{ background: '#2D2A24' }}>
+          <div className="h-full rounded-full gold-gradient transition-all" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="flex gap-4 mt-3">
+          {(['levantado','parcial','pendente'] as const).map(s => (
+            <div key={s} className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS[s].color }} />
+              <span className="text-xs" style={{ color: '#6B6458' }}>
+                {STATUS[s].label}: {sections.filter(x => x.status === s).length}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="px-4 py-4">
-        {/* Progress */}
-        <div className="bg-white rounded-2xl p-4 mb-4 border border-gray-100 shadow-sm">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Progresso geral</span>
-            <span className="text-sm font-semibold" style={{ color: '#D4537E' }}>{pct}%</span>
-          </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: '#D4537E' }} />
-          </div>
-          <div className="flex gap-4 mt-3">
-            {(['levantado','parcial','pendente'] as const).map(s => (
-              <div key={s} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ background: STATUS[s].color }} />
-                <span className="text-xs text-gray-500">{STATUS[s].label}: {sections.filter(x => x.status === s).length}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Sections list */}
         {loading ? (
-          <div className="space-y-3">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-16 bg-white rounded-2xl animate-pulse" />)}
+          <div className="space-y-2.5">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: '#E8DCC8' }} />
+            ))}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -70,17 +74,18 @@ export default function POPPage() {
               const st = STATUS[s.status]
               return (
                 <Link key={s.id} href={`/pop/${s.id}`}
-                  className="bg-white rounded-2xl p-4 flex items-center gap-3 border border-gray-100 shadow-sm active:scale-98 transition-transform">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg" style={{ background: s.color + '22' }}>
-                    📋
+                  className="flex items-center gap-3.5 p-4 rounded-2xl active:scale-98 transition-transform"
+                  style={{ background: '#fff', border: '1px solid #E8DCC8', boxShadow: '0 1px 3px rgba(196,163,90,0.06)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+                    style={{ background: '#F5EDD8' }}>
+                    {ICONS[s.id] ?? '📌'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">{s.title}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                    </div>
+                    <div className="text-sm font-medium truncate" style={{ color: '#1C1A17' }}>{s.title}</div>
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full inline-block mt-0.5"
+                      style={{ background: st.bg, color: st.color }}>{st.label}</span>
                   </div>
-                  <ChevronRight size={16} color="#D1D5DB" />
+                  <ChevronRight size={15} color="#C4A35A" />
                 </Link>
               )
             })}
