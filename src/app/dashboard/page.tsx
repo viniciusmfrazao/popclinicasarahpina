@@ -48,7 +48,7 @@ export default function Dashboard() {
           style={{ background: 'radial-gradient(circle, #C4A35A, transparent)', transform: 'translate(30%,-30%)' }} />
 
         <div className="relative flex items-center justify-between mb-6">
-          <div className="relative w-28 h-16">
+          <div className="relative w-36 h-20">
             <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain', objectPosition: 'left' }} />
           </div>
           <span className="text-[10px] tracking-[0.2em] uppercase px-3 py-1 rounded-full font-medium"
