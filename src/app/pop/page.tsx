@@ -16,7 +16,7 @@ const STATUS = {
 const ICONS: Record<string,string> = {
   cultura:'🌸', jornada:'🗺️', reuniao:'📋', scripts:'💬',
   marketing:'📱', profissionais:'👥', automacoes:'⚡',
-  juridico:'📄', financeiro:'💰', cursos:'🎓', nao_fazer:'🚫',
+  juridico:'📄', financeiro:'💰', cursos:'🎓', nao_fazer:'🚫', comercial:'🤝',
 }
 
 export default function POPPage() {
