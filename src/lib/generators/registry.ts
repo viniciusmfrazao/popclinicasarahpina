@@ -59,12 +59,33 @@ export const GENERATORS: GeneratorModule[] = [
   },
   {
     slug: 'marketing',
-    title: 'Conteúdo de Marketing',
-    description: 'Em breve: roteiros de Reels, legendas e calendário de conteúdo gerados a partir dos gatilhos e categorias do Manual POP.',
+    title: 'Ação de Marketing',
+    description: 'Monta os 8 itens obrigatórios de uma ação (conceito, decoração, experiência, estratégia, reels, chamada, promoções, cronograma) com 30 dias de antecedência.',
     icon: '📱',
     color: '#9E7E3A',
-    available: false,
-    fields: [],
+    available: true,
+    fields: [
+      {
+        key: 'nome_acao',
+        label: 'Nome da ação / data comemorativa',
+        type: 'text',
+        placeholder: 'Ex: Dia das Mães',
+        required: true,
+      },
+      {
+        key: 'data_acao',
+        label: 'Data da ação',
+        type: 'date',
+        required: true,
+      },
+      {
+        key: 'contexto',
+        label: 'Detalhes extras (opcional)',
+        type: 'textarea',
+        placeholder: 'Ex: já temos parceria com uma floricultura, queremos incluir combo casal...',
+        required: false,
+      },
+    ],
   },
   {
     slug: 'comercial',

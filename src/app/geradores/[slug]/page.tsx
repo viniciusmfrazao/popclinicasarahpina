@@ -78,9 +78,12 @@ export default function GeneratorPage() {
       setOutput(data.output)
       const tipoLabel = generator!.fields.find(f => f.key === 'tipo_reuniao')
         ?.options?.find(o => o.value === values.tipo_reuniao)?.label
-      const title = tipoLabel && tipoLabel !== 'Não sei — me ajude a identificar'
-        ? `${generator!.title} — ${tipoLabel}`
-        : generator!.title
+      const nomeAcao = values.nome_acao
+      const title = nomeAcao
+        ? `${generator!.title} — ${nomeAcao}`
+        : tipoLabel && tipoLabel !== 'Não sei — me ajude a identificar'
+          ? `${generator!.title} — ${tipoLabel}`
+          : generator!.title
       const { data: saved } = await supabase.from('generated_documents').insert({
         module: slug,
         title,
