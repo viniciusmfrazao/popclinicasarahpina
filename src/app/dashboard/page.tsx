@@ -112,6 +112,7 @@ export default function Dashboard() {
             { label: 'Meus checklists',      href: '/checklist' },
             { label: 'Meu perfil',           href: '/perfil'    },
             { label: '🏆 Gerar Certificados',   href: '/certificados' },
+            { label: '✨ Geradores (IA)',       href: '/geradores' },
             { label: '⚙️ Painel Admin',         href: '/admin'     },
           ].map(({ label, href }) => (
             <Link key={href} href={href}
