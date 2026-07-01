@@ -6,7 +6,6 @@ const BORDEAUX = '#6B1E2E'
 const BORDEAUX_DARK = '#4A1020'
 const ROSE_BORDER = '#D9A7B0'
 const TEXT = '#3A342E'
-const GOLD = '#C4A35A'
 
 function formatDate(isoDate: string) {
   const [y, m, d] = isoDate.split('-').map(Number)
@@ -39,50 +38,29 @@ export function generateCertificatePDF(cert: Certificate): jsPDF {
   doc.setFillColor('#FFFFFF')
   doc.rect(0, 0, pageW, pageH, 'F')
 
-  // Moldura dupla: linha externa fina + linha interna em rosé
-  const margin = 10
+  // Moldura única em rosé, igual ao modelo padrão
+  const margin = 12
   doc.setDrawColor(ROSE_BORDER)
-  doc.setLineWidth(0.9)
+  doc.setLineWidth(1.1)
   doc.rect(margin, margin, pageW - margin * 2, pageH - margin * 2)
 
-  const innerMargin = margin + 3
-  doc.setLineWidth(0.3)
-  doc.rect(innerMargin, innerMargin, pageW - innerMargin * 2, pageH - innerMargin * 2)
-
-  // Detalhe de canto em dourado (cantos superiores)
-  doc.setDrawColor(GOLD)
-  doc.setLineWidth(0.6)
-  const cornerLen = 14
-  const cAx = margin, cAy = margin
-  doc.line(cAx, cAy + cornerLen, cAx, cAy)
-  doc.line(cAx, cAy, cAx + cornerLen, cAy)
-  const cBx = pageW - margin, cBy = margin
-  doc.line(cBx, cBy + cornerLen, cBx, cBy)
-  doc.line(cBx, cBy, cBx - cornerLen, cBy)
-  const cCx = margin, cCy = pageH - margin
-  doc.line(cCx, cCy - cornerLen, cCx, cCy)
-  doc.line(cCx, cCy, cCx + cornerLen, cCy)
-  const cDx = pageW - margin, cDy = pageH - margin
-  doc.line(cDx, cDy - cornerLen, cDx, cDy)
-  doc.line(cDx, cDy, cDx - cornerLen, cDy)
-
-  let y = 46
+  let y = 50
 
   // Título
   doc.setFont('times', 'bold')
-  doc.setFontSize(40)
+  doc.setFontSize(46)
   doc.setTextColor(BORDEAUX_DARK)
-  doc.text('CERTIFICADO', cx, y, { align: 'center', charSpace: 3 })
+  doc.text('CERTIFICADO', cx, y, { align: 'center' })
 
-  y += 14
+  y += 16
   doc.setFont('times', 'normal')
   doc.setFontSize(13)
   doc.setTextColor(TEXT)
   doc.text('Certifico que:', cx, y, { align: 'center' })
 
-  y += 22
+  y += 24
   doc.setFont('times', 'italic')
-  doc.setFontSize(28)
+  doc.setFontSize(29)
   doc.setTextColor(BORDEAUX)
   doc.text(cert.student_name, cx, y, { align: 'center' })
 
@@ -123,12 +101,6 @@ export function generateCertificatePDF(cert: Certificate): jsPDF {
   doc.setFontSize(10)
   doc.setTextColor('#8A8178')
   doc.text(cert.instructor_title, cx, sigY + 11.5, { align: 'center' })
-
-  // Rodapé discreto com marca
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7.5)
-  doc.setTextColor('#B8A8AE')
-  doc.text('Instituto Sarah Pina', cx, pageH - margin - 4, { align: 'center' })
 
   return doc
 }
