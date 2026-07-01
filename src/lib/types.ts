@@ -75,3 +75,16 @@ export interface ChecklistProgress {
   completed: boolean
   completed_at?: string
 }
+
+export interface Certificate {
+  id: string
+  student_name: string
+  course_title: string
+  instructor_name: string
+  instructor_title: string
+  workload_hours: number
+  issue_date: string
+  certificate_type: 'padrao' | 'trofeu'
+  created_by?: string
+  created_at: string
+}
