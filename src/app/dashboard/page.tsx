@@ -16,8 +16,19 @@ export default function Dashboard() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
-      supabase.from('profiles').select('name,role').eq('id', data.user.id).single()
-        .then(({ data: p }) => p && setProfile(p))
+      supabase.from('profiles')
+        .select('name,role,subscription_status,subscription_expires_at')
+        .eq('id', data.user.id).single()
+        .then(({ data: p }) => {
+          if (!p) return
+          if (p.role === 'cliente') {
+            const expired = p.subscription_status !== 'active'
+              || !p.subscription_expires_at
+              || new Date(p.subscription_expires_at) < new Date()
+            if (expired) { router.push('/assinatura-expirada'); return }
+          }
+          setProfile(p)
+        })
       supabase.from('sections').select('status')
         .then(({ data: s }) => s && setStats({
           sections: s.length,

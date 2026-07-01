@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'team' | 'student'
+export type Role = 'admin' | 'team' | 'student' | 'cliente'
 export type SectionStatus = 'levantado' | 'parcial' | 'pendente'
 
 export interface Profile {
@@ -7,6 +7,8 @@ export interface Profile {
   role: Role
   avatar_url?: string
   created_at: string
+  subscription_status?: 'active' | 'inactive' | null
+  subscription_expires_at?: string | null
 }
 
 export interface Section {
