@@ -9,7 +9,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default function Dashboard() {
-  const [profile, setProfile] = useState<{ name: string; role: string } | null>(null)
+  const [profile, setProfile] = useState<{ name: string; role: string; access_lista_compras?: boolean } | null>(null)
   const [stats, setStats] = useState({ sections: 0, levantado: 0 })
   const router = useRouter()
 
@@ -17,7 +17,7 @@ export default function Dashboard() {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
       supabase.from('profiles')
-        .select('name,role,subscription_status,subscription_expires_at')
+        .select('name,role,subscription_status,subscription_expires_at,access_lista_compras')
         .eq('id', data.user.id).single()
         .then(({ data: p }) => {
           if (!p) return
@@ -122,6 +122,9 @@ export default function Dashboard() {
             { label: 'Cursos da clínica',    href: '/cursos'    },
             { label: 'Meus checklists',      href: '/checklist' },
             { label: 'Meu perfil',           href: '/perfil'    },
+            ...(profile?.role === 'admin' || profile?.access_lista_compras
+              ? [{ label: '🛒 Lista de Compras', href: '/lista-compras' }]
+              : []),
             { label: '🏆 Gerar Certificados',   href: '/certificados' },
             { label: '✨ Geradores (IA)',       href: '/geradores' },
             { label: '⚙️ Painel Admin',         href: '/admin'     },

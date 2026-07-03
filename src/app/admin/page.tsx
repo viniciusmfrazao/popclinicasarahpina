@@ -12,6 +12,7 @@ interface Profile {
   id: string; name: string; role: string; is_active: boolean
   access_pop: boolean; access_cursos: boolean
   access_checklist: boolean; access_quiz: boolean
+  access_lista_compras: boolean
 }
 
 const PERMS = [
@@ -19,6 +20,7 @@ const PERMS = [
   { key: 'access_cursos',    label: 'Cursos',       icon: '🎓', desc: 'Assistir aulas e treinamentos' },
   { key: 'access_checklist', label: 'Checklist',    icon: '✅', desc: 'Marcar itens do checklist' },
   { key: 'access_quiz',      label: 'Provas',       icon: '📝', desc: 'Realizar testes e avaliações' },
+  { key: 'access_lista_compras', label: 'Lista de Compras', icon: '🛒', desc: 'Ver a lista de compras da clínica' },
 ]
 
 export default function AdminPage() {
