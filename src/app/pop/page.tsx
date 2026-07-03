@@ -14,7 +14,7 @@ const STATUS = {
   pendente:  { label: 'Pendente',  bg: '#F5E8EC', color: '#8B2A3D' },
 }
 const ICONS: Record<string,string> = {
-  cultura:'🌸', jornada:'🗺️', reuniao:'📋', scripts:'💬',
+  cultura:'🌸', jornada:'🗺️', pop_fotos:'📸', reuniao:'📋', scripts:'💬',
   marketing:'📱', profissionais:'👥', automacoes:'⚡',
   juridico:'📄', financeiro:'💰', cursos:'🎓', nao_fazer:'🚫', comercial:'🤝',
 }
