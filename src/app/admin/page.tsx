@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import Image from 'next/image'
-import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette } from 'lucide-react'
+import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 
 interface Profile {
@@ -13,7 +13,10 @@ interface Profile {
   access_pop: boolean; access_cursos: boolean
   access_checklist: boolean; access_quiz: boolean
   access_lista_compras: boolean
+  job_function_id: string | null; job_function_name: string | null
 }
+
+interface JobFunctionOption { id: string; name: string }
 
 const PERMS = [
   { key: 'access_pop',       label: 'Manual POP',  icon: '📋', desc: 'Acesso ao manual completo' },
@@ -25,13 +28,14 @@ const PERMS = [
 
 export default function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
+  const [jobFunctions, setJobFunctions] = useState<JobFunctionOption[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState<string | null>(null)
   const [expandedUser, setExpandedUser] = useState<string | null>(null)
   const router = useRouter()
 
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'team' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'team', job_function_id: '' })
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -41,9 +45,11 @@ export default function AdminPage() {
       if (!data.user) { router.push('/login'); return }
       // Verifica se é admin via perfil próprio
       const { data: p } = await supabase
-        .from('profiles').select('role').eq('id', data.user.id).single()
+        .from('profiles').select('role, account_id').eq('id', data.user.id).single()
       if (!p || p.role !== 'admin') { router.push('/dashboard'); return }
       loadProfiles()
+      supabase.from('job_functions').select('id, name').eq('account_id', p.account_id).order('sort_order')
+        .then(({ data: funcs }) => { if (funcs) setJobFunctions(funcs) })
     })
   }, [router])
 
@@ -63,19 +69,30 @@ export default function AdminPage() {
     setSaving(null)
   }
 
+  async function changeJobFunction(userId: string, jobFunctionId: string) {
+    setSaving(userId + 'job_function')
+    await supabase.rpc('update_member_job_function', {
+      p_user_id: userId, p_job_function_id: jobFunctionId || null,
+    })
+    const funcName = jobFunctions.find(f => f.id === jobFunctionId)?.name ?? null
+    setProfiles(p => p.map(u => u.id === userId ? { ...u, job_function_id: jobFunctionId || null, job_function_name: funcName } : u))
+    setSaving(null)
+  }
+
   async function createUser() {
     if (!form.name || !form.email || !form.password) { setFormError('Preencha todos os campos.'); return }
     if (form.password.length < 6) { setFormError('Senha mínimo 6 caracteres.'); return }
     setFormLoading(true); setFormError('')
     const { error } = await supabase.rpc('create_team_member', {
       p_name: form.name, p_email: form.email,
-      p_password: form.password, p_role: form.role
+      p_password: form.password, p_role: form.role,
+      p_job_function_id: form.job_function_id || null,
     })
     if (error) {
       setFormError('Erro: ' + error.message)
     } else {
       setShowForm(false)
-      setForm({ name: '', email: '', password: '', role: 'team' })
+      setForm({ name: '', email: '', password: '', role: 'team', job_function_id: '' })
       loadProfiles()
     }
     setFormLoading(false)
@@ -104,12 +121,20 @@ export default function AdminPage() {
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <Link href="/admin/marca"
-          className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-semibold text-sm tracking-wide"
-          style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
-          <Palette size={16} />
-          Identidade Visual (logo e cores)
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/admin/marca"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-xs tracking-wide"
+            style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
+            <Palette size={14} />
+            Identidade Visual
+          </Link>
+          <Link href="/admin/funcoes"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-xs tracking-wide"
+            style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
+            <Briefcase size={14} />
+            Funções da Equipe
+          </Link>
+        </div>
 
         <button onClick={() => setShowForm(true)}
           className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl btn-bordo font-semibold text-sm tracking-wide">
@@ -170,6 +195,18 @@ export default function AdminPage() {
                   ))}
                 </div>
               </div>
+              {form.role === 'team' && jobFunctions.length > 0 && (
+                <div>
+                  <label className="block text-[11px] font-semibold tracking-[0.12em] uppercase mb-1.5"
+                    style={{ color: '#6B1E2E' }}>Função (opcional)</label>
+                  <select value={form.job_function_id} onChange={e => setForm(f => ({ ...f, job_function_id: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none"
+                    style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }}>
+                    <option value="">Sem função específica</option>
+                    {jobFunctions.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="rounded-xl p-3" style={{ background: '#F5EDD8', border: '1px solid #E8CFA0' }}>
                 <p className="text-[11px] font-semibold mb-1" style={{ color: '#9E7E3A' }}>📋 Permissão inicial</p>
                 <p className="text-[11px]" style={{ color: '#9E7E3A' }}>
@@ -206,7 +243,8 @@ export default function AdminPage() {
                       <UserCard key={u.id} user={u}
                         expanded={expandedUser === u.id}
                         onToggle={() => setExpandedUser(expandedUser === u.id ? null : u.id)}
-                        onPerm={togglePerm} saving={saving} />
+                        onPerm={togglePerm} saving={saving}
+                        jobFunctions={jobFunctions} onChangeFunction={changeJobFunction} />
                     ))}
                   </div>
                 </div>
@@ -238,9 +276,10 @@ function Toggle({ on, onChange, loading }: { on: boolean; onChange: (v: boolean)
   )
 }
 
-function UserCard({ user, expanded, onToggle, onPerm, saving }: {
+function UserCard({ user, expanded, onToggle, onPerm, saving, jobFunctions, onChangeFunction }: {
   user: Profile; expanded: boolean; onToggle: () => void
   onPerm: (id: string, key: string, val: boolean) => void; saving: string | null
+  jobFunctions: JobFunctionOption[]; onChangeFunction: (id: string, jobFunctionId: string) => void
 }) {
   const activePerms = PERMS.filter(p => user[p.key as keyof Profile])
   return (
@@ -252,7 +291,12 @@ function UserCard({ user, expanded, onToggle, onPerm, saving }: {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold" style={{ color: '#1C1A17' }}>{user.name}</div>
-          <div className="flex gap-1 mt-1">
+          <div className="flex gap-1 mt-1 flex-wrap">
+            {user.job_function_name && (
+              <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: '#F5E8EC', color: '#6B1E2E' }}>
+                {user.job_function_name}
+              </span>
+            )}
             {activePerms.map(p => (
               <span key={p.key} className="text-xs px-1.5 py-0.5 rounded-full"
                 style={{ background: '#F5EDD8', color: '#9E7E3A' }}>{p.icon}</span>
@@ -268,6 +312,20 @@ function UserCard({ user, expanded, onToggle, onPerm, saving }: {
       {expanded && (
         <div style={{ borderTop: '1px solid #F9F5F6' }}>
           <div className="px-4 pt-3 pb-4 space-y-3.5">
+            {jobFunctions.length > 0 && user.role === 'team' && (
+              <div>
+                <p className="text-[11px] font-semibold tracking-[0.1em] uppercase mb-1.5" style={{ color: '#6B1E2E' }}>
+                  Função
+                </p>
+                <select value={user.job_function_id ?? ''} onChange={e => onChangeFunction(user.id, e.target.value)}
+                  disabled={saving === user.id + 'job_function'}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none"
+                  style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }}>
+                  <option value="">Sem função específica</option>
+                  {jobFunctions.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                </select>
+              </div>
+            )}
             <p className="text-[11px] font-semibold tracking-[0.1em] uppercase" style={{ color: '#6B1E2E' }}>
               Permissões
             </p>
