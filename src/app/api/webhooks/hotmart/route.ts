@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { accountId } = await findOrCreateAccountAndUser(email, name)
+    const { accountId } = await findOrCreateAccountAndUser(email, name, req.nextUrl.origin)
 
     if (GRANT_EVENTS.has(event)) {
       const expiresAt = new Date()
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
  * com o conteúdo clonado do template + convida o comprador por e-mail como
  * admin da própria conta (define senha pelo link que o Supabase envia).
  */
-async function findOrCreateAccountAndUser(email: string, name?: string): Promise<{ accountId: string }> {
+async function findOrCreateAccountAndUser(email: string, name: string | undefined, appOrigin: string): Promise<{ accountId: string }> {
   const { data: list, error: listError } = await supabaseAdmin.auth.admin.listUsers({
     page: 1,
     perPage: 1000,
@@ -127,9 +127,12 @@ async function findOrCreateAccountAndUser(email: string, name?: string): Promise
     .rpc('provision_account_content', { p_account_name: accountName })
   if (provisionError) throw provisionError
 
-  // Convida o comprador por e-mail como admin da própria conta
+  // Convida o comprador por e-mail como admin da própria conta, com o link
+  // apontando explicitamente pra tela de definir senha (não depende de
+  // configuração externa, usa o próprio domínio da requisição).
   const { data: created, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
     data: { role: 'admin', name: name || email.split('@')[0], account_id: accountId },
+    redirectTo: `${appOrigin}/redefinir-senha`,
   })
   if (inviteError) throw inviteError
   if (!created.user) throw new Error('Falha ao criar usuário via convite.')

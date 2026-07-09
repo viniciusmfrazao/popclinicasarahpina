@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [email, setEmail]       = useState('')
@@ -65,6 +66,11 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
                   style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }} />
+                <div className="text-right mt-1.5">
+                  <Link href="/recuperar-senha" className="text-xs font-medium" style={{ color: '#9E7E3A' }}>
+                    Esqueci minha senha
+                  </Link>
+                </div>
               </div>
               {error && (
                 <p className="text-xs rounded-xl px-4 py-3" style={{ background: '#FEF2F2', color: '#B91C1C' }}>
@@ -83,7 +89,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs mt-8" style={{ color: '#C4A8B0' }}>
-          © {new Date().getFullYear()} Clínica Sarah Pina · Todos os direitos reservados
+          © {new Date().getFullYear()} Sistema POP · Todos os direitos reservados
         </p>
       </div>
     </div>
