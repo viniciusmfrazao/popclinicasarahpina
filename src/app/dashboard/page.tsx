@@ -17,18 +17,18 @@ export default function Dashboard() {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
       supabase.from('profiles')
-        .select('name,role,subscription_status,subscription_expires_at,access_lista_compras,accounts(logo_url)')
+        .select('name,role,access_lista_compras,accounts(logo_url,is_master,subscription_status,subscription_expires_at)')
         .eq('id', data.user.id).single()
         .then(({ data: p }) => {
           if (!p) return
-          if (p.role === 'cliente') {
-            const expired = p.subscription_status !== 'active'
-              || !p.subscription_expires_at
-              || new Date(p.subscription_expires_at) < new Date()
+          const acc = Array.isArray(p.accounts) ? p.accounts[0] : p.accounts
+          if (acc && !acc.is_master) {
+            const expired = acc.subscription_status !== 'active'
+              || !acc.subscription_expires_at
+              || new Date(acc.subscription_expires_at) < new Date()
             if (expired) { router.push('/assinatura-expirada'); return }
           }
           setProfile(p)
-          const acc = Array.isArray(p.accounts) ? p.accounts[0] : p.accounts
           if (acc?.logo_url) setLogoUrl(acc.logo_url)
         })
       supabase.from('sections').select('status')

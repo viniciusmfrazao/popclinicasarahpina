@@ -70,25 +70,28 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const userId = await findOrCreateUser(email, name)
+    const { accountId } = await findOrCreateAccountAndUser(email, name)
 
     if (GRANT_EVENTS.has(event)) {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 35) // 35 dias de folga sobre o ciclo mensal de 30
 
-      await supabaseAdmin.from('profiles').update({
-        subscription_status: 'active',
-        subscription_expires_at: expiresAt.toISOString(),
+      await supabaseAdmin.rpc('update_account_subscription', {
+        p_account_id: accountId,
+        p_status: 'active',
+        p_expires_at: expiresAt.toISOString(),
+      })
+      await supabaseAdmin.from('accounts').update({
         hotmart_transaction_id: transactionId ?? null,
-        hotmart_email: email,
-        is_active: true,
-      }).eq('id', userId)
+      }).eq('id', accountId)
     }
 
     if (REVOKE_EVENTS.has(event)) {
-      await supabaseAdmin.from('profiles').update({
-        subscription_status: 'inactive',
-      }).eq('id', userId)
+      await supabaseAdmin.rpc('update_account_subscription', {
+        p_account_id: accountId,
+        p_status: 'inactive',
+        p_expires_at: null,
+      })
     }
 
     return NextResponse.json({ received: true, action: GRANT_EVENTS.has(event) ? 'granted' : 'revoked', event })
@@ -99,11 +102,11 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * Encontra o usuário pelo e-mail ou cria um novo (enviando convite por e-mail
- * via Supabase Auth, que já leva o link de definição de senha).
+ * Encontra a conta do comprador pelo e-mail (renovação) ou cria uma conta nova
+ * com o conteúdo clonado do template + convida o comprador por e-mail como
+ * admin da própria conta (define senha pelo link que o Supabase envia).
  */
-async function findOrCreateUser(email: string, name?: string): Promise<string> {
-  // Tenta localizar usuário já existente (ex: renovação de assinatura)
+async function findOrCreateAccountAndUser(email: string, name?: string): Promise<{ accountId: string }> {
   const { data: list, error: listError } = await supabaseAdmin.auth.admin.listUsers({
     page: 1,
     perPage: 1000,
@@ -111,14 +114,25 @@ async function findOrCreateUser(email: string, name?: string): Promise<string> {
   if (listError) throw listError
 
   const existing = list.users.find(u => u.email?.toLowerCase() === email)
-  if (existing) return existing.id
+  if (existing) {
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles').select('account_id').eq('id', existing.id).single()
+    if (profileError) throw profileError
+    return { accountId: profile.account_id }
+  }
 
-  // Cria novo usuário + envia e-mail de convite com link pra definir senha
+  // Conta nova: clona o template do POP master
+  const accountName = name ? `Clínica ${name}` : email.split('@')[0]
+  const { data: accountId, error: provisionError } = await supabaseAdmin
+    .rpc('provision_account_content', { p_account_name: accountName })
+  if (provisionError) throw provisionError
+
+  // Convida o comprador por e-mail como admin da própria conta
   const { data: created, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-    data: { role: 'cliente', name: name || email.split('@')[0] },
+    data: { role: 'admin', name: name || email.split('@')[0], account_id: accountId },
   })
   if (inviteError) throw inviteError
   if (!created.user) throw new Error('Falha ao criar usuário via convite.')
 
-  return created.user.id
+  return { accountId }
 }
