@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import Image from 'next/image'
 import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette, Briefcase } from 'lucide-react'
 import Link from 'next/link'
 
@@ -29,6 +28,7 @@ const PERMS = [
 export default function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [jobFunctions, setJobFunctions] = useState<JobFunctionOption[]>([])
+  const [logoUrl, setLogoUrl] = useState('/sistema-pop-mark.svg')
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState<string | null>(null)
@@ -45,8 +45,10 @@ export default function AdminPage() {
       if (!data.user) { router.push('/login'); return }
       // Verifica se é admin via perfil próprio
       const { data: p } = await supabase
-        .from('profiles').select('role, account_id').eq('id', data.user.id).single()
+        .from('profiles').select('role, account_id, accounts(logo_url)').eq('id', data.user.id).single()
       if (!p || p.role !== 'admin') { router.push('/dashboard'); return }
+      const acc = Array.isArray(p.accounts) ? p.accounts[0] : p.accounts
+      if (acc?.logo_url) setLogoUrl(acc.logo_url)
       loadProfiles()
       supabase.from('job_functions').select('id, name').eq('account_id', p.account_id).order('sort_order')
         .then(({ data: funcs }) => { if (funcs) setJobFunctions(funcs) })
@@ -114,7 +116,8 @@ export default function AdminPage() {
             <h1 className="text-xl font-semibold" style={{ color: '#fff' }}>Gestão de Equipe</h1>
           </div>
           <div className="relative w-20 h-12">
-            <Image src="/logo.png" alt="SP" fill style={{ objectFit: 'contain', objectPosition: 'right' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'right' }} />
           </div>
         </div>
         <div className="mt-4 h-px gold-bar opacity-60" />

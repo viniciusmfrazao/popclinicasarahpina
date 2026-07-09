@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import { BookOpen, GraduationCap, CheckSquare, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function Dashboard() {
   const [profile, setProfile] = useState<{ name: string; role: string; access_lista_compras?: boolean } | null>(null)
+  const [logoUrl, setLogoUrl] = useState('/sistema-pop-mark.svg')
   const [stats, setStats] = useState({ sections: 0, levantado: 0 })
   const router = useRouter()
 
@@ -17,7 +17,7 @@ export default function Dashboard() {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
       supabase.from('profiles')
-        .select('name,role,subscription_status,subscription_expires_at,access_lista_compras')
+        .select('name,role,subscription_status,subscription_expires_at,access_lista_compras,accounts(logo_url)')
         .eq('id', data.user.id).single()
         .then(({ data: p }) => {
           if (!p) return
@@ -28,6 +28,8 @@ export default function Dashboard() {
             if (expired) { router.push('/assinatura-expirada'); return }
           }
           setProfile(p)
+          const acc = Array.isArray(p.accounts) ? p.accounts[0] : p.accounts
+          if (acc?.logo_url) setLogoUrl(acc.logo_url)
         })
       supabase.from('sections').select('status')
         .then(({ data: s }) => s && setStats({
@@ -61,7 +63,8 @@ export default function Dashboard() {
         {/* Logo centralizada */}
         <div className="flex justify-center mb-6">
           <div className="relative w-36 h-20">
-            <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         </div>
 

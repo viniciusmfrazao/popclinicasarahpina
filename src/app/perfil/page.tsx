@@ -5,19 +5,24 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import { LogOut, BookOpen, GraduationCap, CheckSquare } from 'lucide-react'
-import Image from 'next/image'
 
 export default function PerfilPage() {
   const [profile, setProfile] = useState<{ name: string; role: string } | null>(null)
   const [email, setEmail] = useState('')
+  const [logoUrl, setLogoUrl] = useState('/sistema-pop-mark.svg')
   const router = useRouter()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) { router.push('/login'); return }
       setEmail(data.user.email ?? '')
-      supabase.from('profiles').select('name,role').eq('id', data.user.id).single()
-        .then(({ data: p }) => p && setProfile(p))
+      supabase.from('profiles').select('name,role,accounts(logo_url)').eq('id', data.user.id).single()
+        .then(({ data: p }) => {
+          if (!p) return
+          setProfile(p)
+          const acc = Array.isArray(p.accounts) ? p.accounts[0] : p.accounts
+          if (acc?.logo_url) setLogoUrl(acc.logo_url)
+        })
     })
   }, [router])
 
@@ -27,7 +32,8 @@ export default function PerfilPage() {
     <div className="min-h-screen pb-28" style={{ background: '#F9F5F6' }}>
       <div className="header-bg px-5 pt-12 pb-8">
         <div className="relative w-24 h-14 mb-4">
-          <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain', objectPosition: 'left' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'left' }} />
         </div>
         <h1 className="text-xl font-semibold" style={{ color: '#fff' }}>Meu Perfil</h1>
       </div>

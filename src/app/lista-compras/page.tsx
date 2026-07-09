@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
 
@@ -24,6 +23,7 @@ export default function ListaComprasPage() {
   const [items, setItems] = useState<ShoppingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState('/sistema-pop-mark.svg')
 
   const [newItem, setNewItem] = useState('')
   const [newQty, setNewQty] = useState('')
@@ -33,8 +33,10 @@ export default function ListaComprasPage() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
       const { data: profile } = await supabase
-        .from('profiles').select('role, access_lista_compras').eq('id', data.user.id).single()
+        .from('profiles').select('role, access_lista_compras, accounts(logo_url)').eq('id', data.user.id).single()
       if (!profile) { router.push('/dashboard'); return }
+      const acc = Array.isArray(profile.accounts) ? profile.accounts[0] : profile.accounts
+      if (acc?.logo_url) setLogoUrl(acc.logo_url)
       const admin = profile.role === 'admin'
       const canView = admin || profile.access_lista_compras === true
       if (!canView) { router.push('/dashboard'); return }
@@ -116,7 +118,8 @@ export default function ListaComprasPage() {
             <h1 className="text-xl font-semibold" style={{ color: '#fff' }}>Lista de Compras</h1>
           </div>
           <div className="relative w-20 h-12">
-            <Image src="/logo.png" alt="SP" fill style={{ objectFit: 'contain', objectPosition: 'right' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'right' }} />
           </div>
         </div>
         <div className="mt-4 h-px gold-bar opacity-60" />

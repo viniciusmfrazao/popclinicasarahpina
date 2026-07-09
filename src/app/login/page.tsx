@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail]       = useState('')
@@ -28,10 +27,11 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Logo area */}
         <div className="flex flex-col items-center mb-6">
-          <div style={{ position: 'relative', width: '88vw', maxWidth: '360px', height: '260px' }}>
-            <Image src="/logo.png" alt="Clínica Sarah Pina" fill style={{ objectFit: 'contain' }} priority />
+          <div style={{ position: 'relative', width: '88vw', maxWidth: '340px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/sistema-pop-logo.svg" alt="Sistema POP" style={{ width: '100%', height: 'auto' }} />
           </div>
-          <div className="h-px w-32 gold-bar" />
+          <div className="h-px w-32 gold-bar mt-2" />
           <p className="mt-3 text-[11px] tracking-[0.3em] uppercase font-medium" style={{ color: '#9E7E3A' }}>
             Sistema de Gestão
           </p>
