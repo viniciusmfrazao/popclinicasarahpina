@@ -2,14 +2,14 @@
 export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import { useAccount } from '@/lib/useAccount'
 import { Section, SectionItem, Note } from '@/lib/types'
 import { generatePOPSectionPDF, popSectionFileName } from '@/lib/pop-pdf'
 import {
   ChevronDown, ChevronUp, Plus, Trash2, ArrowLeft, Pencil,
-  Download, Check, X, Loader2,
+  Download, Check, X, Loader2, AlertTriangle,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -23,6 +23,7 @@ const inputStyle = { background: '#F9F5F6', border: '1px solid #EDD8DE', color: 
 
 export default function SectionPage() {
   const { id } = useParams()
+  const router = useRouter()
   const { userId, account, isAdmin } = useAccount()
 
   const [section, setSection] = useState<Section | null>(null)
@@ -41,6 +42,8 @@ export default function SectionPage() {
   const [newItem, setNewItem] = useState({ title: '', content: '' })
   const [savingItem, setSavingItem] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!userId) return
@@ -125,6 +128,16 @@ export default function SectionPage() {
     ])
   }
 
+  async function deleteSection() {
+    if (!section) return
+    setDeleting(true)
+    const { error } = await supabase.from('sections')
+      .delete().eq('id', section.id).eq('account_id', section.account_id)
+    setDeleting(false)
+    if (error) return
+    router.push('/pop')
+  }
+
   async function exportPDF() {
     if (!section || !account) return
     setExporting(true)
@@ -185,6 +198,27 @@ export default function SectionPage() {
                 Salvar
               </button>
             </div>
+            {!confirmDelete ? (
+              <button onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-1.5 text-[11px] font-medium mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                <Trash2 size={11} /> Excluir esta seção
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 mt-1 p-2.5 rounded-xl" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                <AlertTriangle size={14} color="#E8A0A0" className="shrink-0" />
+                <span className="flex-1 text-[11px]" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  Excluir apaga todos os itens e checklists desta seção. Não pode ser desfeito.
+                </span>
+                <button onClick={() => setConfirmDelete(false)} className="text-[11px] font-medium px-2 py-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  Cancelar
+                </button>
+                <button onClick={deleteSection} disabled={deleting}
+                  className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                  style={{ background: '#B35A5A', color: '#fff' }}>
+                  {deleting ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />} Confirmar
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>

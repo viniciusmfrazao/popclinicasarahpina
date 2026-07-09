@@ -175,7 +175,7 @@ export default function POPPage() {
                   style={{ border: '1px solid #EDD8DE', boxShadow: '0 1px 4px rgba(107,30,46,0.05)' }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
                     style={{ background: '#F5E8EC' }}>
-                    {s.icon || ICONS[s.id] || '📌'}
+                    {ICONS[s.id] || s.icon || '📌'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold truncate mb-1" style={{ color: '#1C1A17' }}>{s.title}</div>
