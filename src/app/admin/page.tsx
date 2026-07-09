@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
 import Image from 'next/image'
-import { ArrowLeft, X, Eye, EyeOff, UserPlus } from 'lucide-react'
+import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette } from 'lucide-react'
 import Link from 'next/link'
 
 interface Profile {
@@ -104,6 +104,13 @@ export default function AdminPage() {
       </div>
 
       <div className="px-4 py-4 space-y-4">
+        <Link href="/admin/marca"
+          className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-semibold text-sm tracking-wide"
+          style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
+          <Palette size={16} />
+          Identidade Visual (logo e cores)
+        </Link>
+
         <button onClick={() => setShowForm(true)}
           className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl btn-bordo font-semibold text-sm tracking-wide">
           <UserPlus size={17} color="#fff" />
