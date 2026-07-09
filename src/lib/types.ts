@@ -1,18 +1,47 @@
 export type Role = 'admin' | 'team' | 'student' | 'cliente'
 export type SectionStatus = 'levantado' | 'parcial' | 'pendente'
 
+export interface Account {
+  id: string
+  name: string
+  slug?: string | null
+  logo_url?: string | null
+  primary_color: string
+  secondary_color: string
+  is_master: boolean
+  access_certificados: boolean
+  subscription_status?: string | null
+  subscription_expires_at?: string | null
+}
+
+export interface JobFunction {
+  id: string
+  account_id: string
+  name: string
+  sort_order: number
+}
+
 export interface Profile {
   id: string
   name: string
   role: Role
   avatar_url?: string
   created_at: string
+  account_id: string
+  job_function_id?: string | null
+  is_active?: boolean
+  access_pop?: boolean
+  access_cursos?: boolean
+  access_checklist?: boolean
+  access_quiz?: boolean
+  access_lista_compras?: boolean
   subscription_status?: 'active' | 'inactive' | null
   subscription_expires_at?: string | null
 }
 
 export interface Section {
   id: string
+  account_id: string
   title: string
   summary: string
   icon: string
@@ -23,6 +52,7 @@ export interface Section {
 
 export interface SectionItem {
   id: string
+  account_id: string
   section_id: string
   title: string
   content: string
@@ -65,7 +95,9 @@ export interface LessonProgress {
 
 export interface ChecklistItem {
   id: string
+  account_id: string
   section_id: string
+  job_function_id?: string | null
   title: string
   description?: string
   sort_order: number
