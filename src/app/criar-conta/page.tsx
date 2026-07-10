@@ -5,19 +5,45 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+export default function CriarContaPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName]         = useState('')
+  const [phone, setPhone]       = useState('')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const router = useRouter()
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError('E-mail ou senha incorretos.'); setLoading(false) }
-    else router.push('/dashboard')
+
+    try {
+      const res = await fetch('/api/auth/self-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name, phone }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Não foi possível criar sua conta.')
+        setLoading(false)
+        return
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) {
+        setError('Conta criada! Faça login para continuar.')
+        setLoading(false)
+        router.push('/login')
+        return
+      }
+      router.push('/dashboard')
+    } catch {
+      setError('Erro de conexão. Tente novamente.')
+      setLoading(false)
+    }
   }
 
   return (
@@ -44,33 +70,48 @@ export default function LoginPage() {
 
           {/* Card header */}
           <div className="header-bg px-6 py-5">
-            <p className="text-xs tracking-[0.2em] uppercase font-medium" style={{ color: '#E8CFA0' }}>Bem-vinda</p>
-            <h1 className="text-lg font-semibold mt-0.5" style={{ color: '#fff' }}>Acesse sua conta</h1>
+            <p className="text-xs tracking-[0.2em] uppercase font-medium" style={{ color: '#E8CFA0' }}>Comprou o Sistema POP?</p>
+            <h1 className="text-lg font-semibold mt-0.5" style={{ color: '#fff' }}>Crie sua conta</h1>
           </div>
 
           {/* Card body */}
           <div className="bg-white px-6 py-6">
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-[11px] font-semibold tracking-[0.15em] uppercase mb-2"
-                  style={{ color: '#6B1E2E' }}>E-mail</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                  placeholder="seu@email.com"
+                  style={{ color: '#6B1E2E' }}>Nome completo</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} required
+                  placeholder="Seu nome"
                   className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
                   style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }} />
               </div>
               <div>
                 <label className="block text-[11px] font-semibold tracking-[0.15em] uppercase mb-2"
-                  style={{ color: '#6B1E2E' }}>Senha</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-                  placeholder="••••••••"
+                  style={{ color: '#6B1E2E' }}>E-mail da compra</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                  placeholder="seu@email.com"
                   className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
                   style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }} />
-                <div className="text-right mt-1.5">
-                  <Link href="/recuperar-senha" className="text-xs font-medium" style={{ color: '#9E7E3A' }}>
-                    Esqueci minha senha
-                  </Link>
-                </div>
+                <p className="text-[11px] mt-1.5" style={{ color: '#B08A94' }}>
+                  Use o mesmo e-mail informado na hora da compra.
+                </p>
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold tracking-[0.15em] uppercase mb-2"
+                  style={{ color: '#6B1E2E' }}>Telefone</label>
+                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required
+                  placeholder="(00) 00000-0000"
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
+                  style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }} />
+              </div>
+              <div>
+                <label className="block text-[11px] font-semibold tracking-[0.15em] uppercase mb-2"
+                  style={{ color: '#6B1E2E' }}>Crie uma senha</label>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                  minLength={6}
+                  placeholder="Mínimo 6 caracteres"
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none"
+                  style={{ background: '#F9F5F6', border: '1px solid #EDD8DE', color: '#1C1A17' }} />
               </div>
               {error && (
                 <p className="text-xs rounded-xl px-4 py-3" style={{ background: '#FEF2F2', color: '#B91C1C' }}>
@@ -79,7 +120,7 @@ export default function LoginPage() {
               )}
               <button type="submit" disabled={loading}
                 className="w-full py-3.5 rounded-xl text-sm font-semibold tracking-[0.12em] uppercase btn-bordo disabled:opacity-60 transition-opacity mt-2">
-                {loading ? 'Entrando...' : 'Entrar'}
+                {loading ? 'Criando conta...' : 'Criar minha conta'}
               </button>
             </form>
           </div>
@@ -89,11 +130,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs mt-8 text-center" style={{ color: '#C4A8B0' }}>
-          Comprou o Sistema POP? <Link href="/criar-conta" className="font-medium" style={{ color: '#9E7E3A' }}>Criar minha conta</Link>
-        </p>
-
-        <p className="text-xs mt-3" style={{ color: '#C4A8B0' }}>
-          © {new Date().getFullYear()} Sistema POP · Todos os direitos reservados
+          Já tem conta? <Link href="/login" className="font-medium" style={{ color: '#9E7E3A' }}>Fazer login</Link>
         </p>
       </div>
     </div>
