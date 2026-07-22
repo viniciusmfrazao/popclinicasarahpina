@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '@/components/BottomNav'
-import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette, Briefcase } from 'lucide-react'
+import { ArrowLeft, X, Eye, EyeOff, UserPlus, Palette, Briefcase, ListChecks } from 'lucide-react'
 import Link from 'next/link'
 
 interface Profile {
@@ -129,13 +129,19 @@ export default function AdminPage() {
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-xs tracking-wide"
             style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
             <Palette size={14} />
-            Identidade Visual
+            Marca
           </Link>
           <Link href="/admin/funcoes"
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-xs tracking-wide"
             style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
             <Briefcase size={14} />
-            Funções da Equipe
+            Funções
+          </Link>
+          <Link href="/admin/atividades"
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-semibold text-xs tracking-wide"
+            style={{ background: '#fff', border: '1px solid #EDD8DE', color: '#6B1E2E' }}>
+            <ListChecks size={14} />
+            Atividades
           </Link>
         </div>
 

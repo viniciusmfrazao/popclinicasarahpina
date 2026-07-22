@@ -59,6 +59,20 @@ export interface SectionItem {
   sort_order: number
 }
 
+export type ActivityFrequency = 'diaria' | 'semanal' | 'mensal'
+
+export interface TeamActivity {
+  id: string
+  account_id: string
+  profile_id?: string | null
+  section_item_id?: string | null
+  title: string
+  frequency: ActivityFrequency
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Note {
   id: string
   user_id: string
