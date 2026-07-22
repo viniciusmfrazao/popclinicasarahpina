@@ -63,9 +63,10 @@ export default function SectionPage() {
   }
 
   async function addNote() {
-    if (!noteText.trim() || !userId) return
-    const { data } = await supabase.from('notes')
-      .insert({ section_id: id, user_id: userId, content: noteText.trim() }).select().single()
+    if (!noteText.trim() || !userId || !account) return
+    const { data, error } = await supabase.from('notes')
+      .insert({ section_id: id, user_id: userId, account_id: account.id, content: noteText.trim() }).select().single()
+    if (error) return
     if (data) { setNotes(p => [...p, data]); setNoteText('') }
   }
 
