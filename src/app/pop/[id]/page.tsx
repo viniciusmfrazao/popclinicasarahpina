@@ -359,7 +359,12 @@ export default function SectionPage() {
             {notes.map(note => (
               <div key={note.id} className="flex gap-3 py-3" style={{ borderBottom: '1px solid #F9F5F6' }}>
                 <p className="flex-1 text-sm leading-relaxed" style={{ color: '#1C1A17' }}>{note.content}</p>
-                <button onClick={() => { supabase.from('notes').delete().eq('id', note.id); setNotes(p => p.filter(n => n.id !== note.id)) }}
+                <button onClick={async () => {
+                  const prev = notes
+                  setNotes(p => p.filter(n => n.id !== note.id))
+                  const { error } = await supabase.from('notes').delete().eq('id', note.id)
+                  if (error) setNotes(prev)
+                }}
                   className="shrink-0" style={{ color: '#C4A8B0' }}>
                   <Trash2 size={14} />
                 </button>
